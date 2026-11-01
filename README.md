@@ -8,7 +8,7 @@ The Monikers party game as a pass-and-play web app: one phone, two teams,
 three rounds. Describe the name, then one word only, then charades — with
 the same deck all the way through.
 
-**Play it:** https://calesi19.github.io/Monikers-Pocket/
+**Play it:** https://calesi19.github.io/Monikers/
 
 - 181 built-in name cards with a short blurb each
 - 30/40/50-card decks, 45/60/90-second turns

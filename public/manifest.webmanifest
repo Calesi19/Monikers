@@ -5,20 +5,20 @@
   "icons": [
     {
       "sizes": "192x192",
-      "src": "/Monikers-Pocket/icon-192.png",
+      "src": "/Monikers/icon-192.png",
       "type": "image/png"
     },
     {
       "purpose": "any",
       "sizes": "512x512",
-      "src": "/Monikers-Pocket/icon-512.png",
+      "src": "/Monikers/icon-512.png",
       "type": "image/png"
     }
   ],
   "name": "Monikers Pocket",
   "orientation": "portrait",
-  "scope": "/Monikers-Pocket/",
+  "scope": "/Monikers/",
   "short_name": "Monikers Pocket",
-  "start_url": "/Monikers-Pocket/",
+  "start_url": "/Monikers/",
   "theme_color": "#F5F0E6"
 }

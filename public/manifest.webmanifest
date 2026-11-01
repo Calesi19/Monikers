@@ -1,5 +1,5 @@
 {
-  "background_color": "#e3f0ee",
+  "background_color": "#F5F0E6",
   "description": "The pass-and-play party game. One phone, two teams, three rounds.",
   "display": "standalone",
   "icons": [
@@ -20,5 +20,5 @@
   "scope": "/Monikers-Pocket/",
   "short_name": "Monikers Pocket",
   "start_url": "/Monikers-Pocket/",
-  "theme_color": "#e3f0ee"
+  "theme_color": "#F5F0E6"
 }

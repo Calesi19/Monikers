@@ -12,7 +12,8 @@ the same deck all the way through.
   back later and resume
 - Installable as a PWA and fully playable offline once loaded
 
-Built with React + TypeScript + Vite + Tailwind. The game logic lives in
+Built with React + TypeScript + Vite, styled with plain CSS as a Risograph zine
+(design notes in `DESIGN.md`; fonts are self-hosted so it still works offline). The game logic lives in
 `src/game/engine.ts` as a pure, serializable state machine; the deck is in
 `src/game/names.ts`.
 

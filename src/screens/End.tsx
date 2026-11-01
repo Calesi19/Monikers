@@ -1,5 +1,6 @@
 import { totalScores, type GameState } from '../game/engine'
-import { Btn, Card, TEAM_META } from '../ui'
+import { Btn, Setlist, TEAM_META, cn } from '../ui'
+import { fitW } from './Play'
 
 export function GameEnd({
   state,
@@ -16,66 +17,60 @@ export function GameEnd({
   const winner =
     totals[0] === totals[1] ? null : totals[0] > totals[1] ? 0 : 1
   return (
-    <div className="space-y-5">
-      <Card
-        className={
+    <div className="screen">
+      <article
+        className={cn('poster', winner === 0 && 'team-a', winner === 1 && 'team-b')}
+        style={
           winner === null
-            ? 'bg-lemon p-6 text-center'
-            : winner === 0
-              ? 'bg-mint p-6 text-center'
-              : 'bg-teamb p-6 text-center'
+            ? undefined
+            : { ['--p-bg' as string]: 'var(--t-bg)', ['--p-fg' as string]: 'var(--t-fg)' }
         }
       >
-        <p className="text-xs font-black tracking-widest uppercase text-ink/60">
-          Final score
+        <span className="poster__dots" aria-hidden="true" />
+        <p className="poster__kicker">Final pressing sold out · last call</p>
+        <h1 className="poster__title" style={fitW(winner === null ? 'Dead heat' : `${TEAM_META[winner].label} team wins`)}>
+          {winner === null ? (
+            <>
+              Dead <span className="hi">heat</span>
+            </>
+          ) : (
+            <>
+              {TEAM_META[winner].label} team <span className="hi">wins</span>
+            </>
+          )}
+        </h1>
+        <p className="big-score" style={{ marginTop: '1rem', ...fitW(`${totals[0]}:${totals[1]}`) }}>
+          <span aria-hidden="true">
+            {totals[0]}:{totals[1]}
+          </span>
+          <span className="sr-only">
+            Blue {totals[0]}, Gold {totals[1]}
+          </span>
         </p>
-        <p className="mt-2 text-6xl font-black">
-          {totals[0]} — {totals[1]}
-        </p>
-        <p className="mt-2 text-2xl font-black uppercase">
-          {winner === null
-            ? "It's a tie!"
-            : `${TEAM_META[winner].label} Team wins!`}
-        </p>
-      </Card>
+      </article>
 
-      <Card>
-        <div className="space-y-1.5 text-sm font-bold">
-          <div className="flex items-center justify-between text-ink/60">
-            <span></span>
-            <span>Blue · Gold</span>
-          </div>
-          {state.scores.map((r, i) => (
-            <div key={i} className="flex items-center justify-between">
-              <span className="text-ink/60">Round {i + 1}</span>
-              <span>
-                {r[0]} · {r[1]}
-              </span>
-            </div>
-          ))}
-          <div className="flex items-center justify-between border-t-2 border-ink/15 pt-1.5 font-black">
-            <span>Total</span>
-            <span>
-              {totals[0]} · {totals[1]}
-            </span>
-          </div>
-        </div>
-        {state.removed.length > 0 && (
-          <p className="mt-3 text-xs font-semibold text-ink/55">
-            Removed along the way: {state.removed.join(', ')}
-          </p>
-        )}
-      </Card>
+      <Setlist
+        state={state}
+        title="Final setlist"
+        roundsShown={3}
+        note={
+          state.removed.length > 0
+            ? `Cut from the deck along the way: ${state.removed.join(', ')}.`
+            : undefined
+        }
+      />
 
-      <Btn variant="main" onClick={onPlayAgain}>
-        Play Again
-      </Btn>
-      <Btn variant="neutral" onClick={onSetup}>
-        Change Settings
-      </Btn>
-      <Btn variant="neutral" onClick={onHome}>
-        Home
-      </Btn>
+      <div className="btn-row">
+        <Btn variant="primary" onClick={onPlayAgain}>
+          Play again
+        </Btn>
+        <Btn variant="paper" onClick={onSetup}>
+          Change settings
+        </Btn>
+        <Btn variant="paper" onClick={onHome}>
+          Home
+        </Btn>
+      </div>
     </div>
   )
 }

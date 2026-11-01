@@ -1,36 +1,64 @@
 import { useState } from 'react'
 import type { GameConfig } from '../game/engine'
-import { Btn, Card, cn } from '../ui'
+import { Btn, SectionHead, TEAM_META } from '../ui'
 
-function Segmented<T extends number>({
+interface Clip<T> {
+  value: T
+  unit: string
+  note: string
+}
+
+/** Newspaper clippings you stamp to choose. Only one per row is locked in. */
+function Clippings<T extends number>({
+  labelId,
   options,
   value,
   onChange,
-  render,
+  stamp,
 }: {
-  options: T[]
+  labelId: string
+  options: Clip<T>[]
   value: T
   onChange: (v: T) => void
-  render: (v: T) => string
+  stamp: string
 }) {
   return (
-    <div className="flex gap-2">
-      {options.map((o) => (
-        <button
-          key={o}
-          type="button"
-          onClick={() => onChange(o)}
-          className={cn(
-            'btn-brutal flex-1 cursor-pointer rounded-base border-2 border-ink px-2 py-2 font-black shadow-brutal-sm',
-            value === o ? 'bg-main' : 'bg-white',
-          )}
-        >
-          {render(o)}
-        </button>
-      ))}
+    <div className="clippings" role="group" aria-labelledby={labelId}>
+      {options.map((o) => {
+        const on = value === o.value
+        return (
+          <button
+            key={o.value}
+            type="button"
+            className="clip"
+            aria-pressed={on}
+            onClick={() => onChange(o.value)}
+          >
+            <span className="clip__num">{o.value}</span>
+            <span className="clip__unit">{o.unit}</span>
+            <span className="clip__note">{o.note}</span>
+            {on && (
+              <span className="clip__stamp" aria-hidden="true">
+                {stamp}
+              </span>
+            )}
+          </button>
+        )
+      })}
     </div>
   )
 }
+
+const DECKS: Clip<number>[] = [
+  { value: 30, unit: 'cards', note: 'Short set' },
+  { value: 40, unit: 'cards', note: 'The usual' },
+  { value: 50, unit: 'cards', note: 'Long night' },
+]
+const CLOCKS: Clip<number>[] = [
+  { value: 45, unit: 'seconds', note: 'Pure panic' },
+  { value: 60, unit: 'seconds', note: 'House rules' },
+  { value: 90, unit: 'seconds', note: 'Gentle crowd' },
+]
 
 export function Setup({
   onStart,
@@ -42,60 +70,64 @@ export function Setup({
   const [deckSize, setDeckSize] = useState(40)
   const [turnSeconds, setTurnSeconds] = useState(60)
 
-  function start() {
-    onStart({ deckSize, turnSeconds })
-  }
-
   return (
-    <div className="space-y-5">
-      <h2 className="text-center text-3xl font-black uppercase">New Game</h2>
-
-      <div className="grid grid-cols-2 gap-3 text-center">
-        <div className="rounded-base border-2 border-ink bg-teama px-3 py-4 shadow-brutal">
-          <p className="text-2xl font-black uppercase">Blue</p>
-          <p className="text-xs font-bold text-ink/60">Team One</p>
-        </div>
-        <div className="rounded-base border-2 border-ink bg-teamb px-3 py-4 shadow-brutal">
-          <p className="text-2xl font-black uppercase">Gold</p>
-          <p className="text-xs font-bold text-ink/60">Team Two</p>
-        </div>
+    <div className="screen">
+      <div>
+        <p className="meta muted">Issue setup · two teams, one phone</p>
+        <h1 className="display misreg" style={{ fontSize: 'clamp(2.75rem, 13vw, 4rem)', marginTop: '0.375rem' }}>
+          New game
+        </h1>
       </div>
-      <p className="text-center text-sm font-semibold text-ink/70">
-        Split into two teams — that's all the setup there is. The phone just
-        keeps the cards, the clock, and the score.
+
+      <div className="tickets">
+        {TEAM_META.map((t, i) => (
+          <div key={t.label} className={`ticket ${i === 0 ? 'team-a' : 'team-b'}`} style={{ background: 'var(--t-bg)', color: 'var(--t-fg)' }}>
+            <div className="ticket__head">
+              <span>Backstage pass</span>
+            </div>
+            <p className="ticket__name">{t.label}</p>
+            <div className="ticket__stub">
+              <span>{i === 0 ? 'Leads R01' : 'Goes 2nd'}</span>
+              <span className="ticket__no">No.{String(i + 1).padStart(2, '0')}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="lede muted">
+        Split the room into two teams. That is all the setup there is: the
+        phone keeps the cards, the clock and the score.
       </p>
 
-      <Card>
-        <p className="text-xs font-black tracking-widest uppercase text-ink/60">
-          Cards in the deck
-        </p>
-        <div className="mt-2">
-          <Segmented
-            options={[30, 40, 50]}
-            value={deckSize}
-            onChange={setDeckSize}
-            render={(v) => `${v}`}
-          />
-        </div>
-        <p className="mt-4 text-xs font-black tracking-widest uppercase text-ink/60">
-          Seconds per turn
-        </p>
-        <div className="mt-2">
-          <Segmented
-            options={[45, 60, 90]}
-            value={turnSeconds}
-            onChange={setTurnSeconds}
-            render={(v) => `${v}s`}
-          />
-        </div>
-      </Card>
+      <section>
+        <SectionHead id="deck-label">Cards in the deck</SectionHead>
+        <Clippings
+          labelId="deck-label"
+          options={DECKS}
+          value={deckSize}
+          onChange={setDeckSize}
+          stamp="IN THE POOL"
+        />
+      </section>
 
-      <Btn variant="main" onClick={start}>
-        Start Game
-      </Btn>
-      <Btn variant="neutral" onClick={onBack}>
-        Back
-      </Btn>
+      <section>
+        <SectionHead id="clock-label">Seconds per turn</SectionHead>
+        <Clippings
+          labelId="clock-label"
+          options={CLOCKS}
+          value={turnSeconds}
+          onChange={setTurnSeconds}
+          stamp="LOCKED IN"
+        />
+      </section>
+
+      <div className="btn-row" style={{ marginTop: '0.5rem' }}>
+        <Btn variant="primary" onClick={() => onStart({ deckSize, turnSeconds })}>
+          Print the deck <span className="btn__tag">{deckSize} cards</span>
+        </Btn>
+        <Btn variant="paper" onClick={onBack}>
+          Back
+        </Btn>
+      </div>
     </div>
   )
 }

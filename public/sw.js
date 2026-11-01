@@ -1,6 +1,6 @@
 // Minimal offline cache: the whole game is one small bundle, so cache-first
 // for same-origin requests keeps it playable with no signal at all.
-const CACHE = 'monikers-v3-riso'
+const CACHE = 'monikers-v4-riso'
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE).then((cache) => cache.addAll(['./', './index.html'])),

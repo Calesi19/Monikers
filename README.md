@@ -1,5 +1,7 @@
 # Monikers Pocket
 
+![Monikers Pocket: a Risograph-zine party game for one phone](docs/banner.webp)
+
 The Monikers party game as a pass-and-play web app: one phone, two teams,
 three rounds. Describe the name, then one word only, then charades — with
 the same deck all the way through.

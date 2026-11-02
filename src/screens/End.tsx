@@ -19,7 +19,7 @@ export function GameEnd({
   return (
     <div className="screen">
       <article
-        className={cn('poster', winner === 0 && 'team-a', winner === 1 && 'team-b')}
+        className={cn('poster poster--end', winner === 0 && 'team-a', winner === 1 && 'team-b')}
         style={
           winner === null
             ? undefined
@@ -28,18 +28,18 @@ export function GameEnd({
       >
         <span className="poster__dots" aria-hidden="true" />
         <p className="poster__kicker">Final pressing sold out · last call</p>
-        <h1 className="poster__title" style={fitW(winner === null ? 'Dead heat' : `${TEAM_META[winner].label} team wins`)}>
+        <h1 className="poster__title" style={fitW(winner === null ? 'Dead heat' : `${TEAM_META[winner].label} wins`)}>
           {winner === null ? (
             <>
               Dead <span className="hi">heat</span>
             </>
           ) : (
             <>
-              {TEAM_META[winner].label} team <span className="hi">wins</span>
+              {TEAM_META[winner].label} <span className="hi">wins</span>
             </>
           )}
         </h1>
-        <p className="big-score" style={{ marginTop: '1rem', ...fitW(`${totals[0]}:${totals[1]}`) }}>
+        <p className="big-score" style={{ marginTop: 'clamp(0.5rem, 1.6dvh, 1rem)', ...fitW(`${totals[0]}:${totals[1]}`) }}>
           <span aria-hidden="true">
             {totals[0]}:{totals[1]}
           </span>
@@ -51,7 +51,7 @@ export function GameEnd({
 
       <Setlist
         state={state}
-        title="Final setlist"
+        title="Setlist"
         roundsShown={3}
         note={
           state.removed.length > 0
@@ -64,12 +64,14 @@ export function GameEnd({
         <Btn variant="primary" onClick={onPlayAgain}>
           Play again
         </Btn>
-        <Btn variant="paper" onClick={onSetup}>
-          Change settings
-        </Btn>
-        <Btn variant="paper" onClick={onHome}>
-          Home
-        </Btn>
+        <div className="btn-pair">
+          <Btn variant="paper" onClick={onSetup}>
+            Settings
+          </Btn>
+          <Btn variant="paper" onClick={onHome}>
+            Home
+          </Btn>
+        </div>
       </div>
     </div>
   )

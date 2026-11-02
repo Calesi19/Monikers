@@ -3,9 +3,13 @@
 // and a game survives a refresh, a locked screen, or a dead tab.
 import { NAMES, type NameCard } from './names'
 
+/** versus: Blue vs Gold, most cards wins. coop: one team, fewest turns wins. */
+export type GameMode = 'versus' | 'coop'
+
 export interface GameConfig {
   deckSize: number
   turnSeconds: number
+  mode?: GameMode
 }
 
 export type Phase =
@@ -19,6 +23,10 @@ export type Phase =
 export type TeamIdx = 0 | 1
 
 export interface GameState {
+  /** Missing on saves from before co-op existed: those are versus games. */
+  mode?: GameMode
+  /** Turns started per round, turns[round]. Co-op is scored on these. */
+  turns?: [number, number, number]
   turnSeconds: number
   /** The game's full deck — the same cards are reused all three rounds. */
   deck: NameCard[]
@@ -68,6 +76,8 @@ export function shuffle<T>(arr: T[]): T[] {
 export function newGame(config: GameConfig): GameState {
   const deck = shuffle(NAMES).slice(0, config.deckSize)
   return {
+    mode: config.mode ?? 'versus',
+    turns: [0, 0, 0],
     turnSeconds: config.turnSeconds,
     deck,
     removed: [],
@@ -84,6 +94,18 @@ export function newGame(config: GameConfig): GameState {
     turnEndsAt: null,
     deckCleared: false,
   }
+}
+
+export function isCoop(state: GameState): boolean {
+  return state.mode === 'coop'
+}
+
+export function turnsUsed(state: GameState): [number, number, number] {
+  return state.turns ?? [0, 0, 0]
+}
+
+export function totalTurns(state: GameState): number {
+  return turnsUsed(state).reduce((a, b) => a + b, 0)
 }
 
 export function currentCard(state: GameState): NameCard | null {
@@ -104,8 +126,11 @@ export function toPassScreen(state: GameState): GameState {
 
 /** Begin the timed turn. */
 export function startTurn(state: GameState, now: number): GameState {
+  const turns = [...turnsUsed(state)] as [number, number, number]
+  turns[state.round] += 1
   return {
     ...state,
+    turns,
     turnGuessed: [],
     turnEndsAt: now + state.turnSeconds * 1000,
     phase: 'turn',
@@ -165,7 +190,8 @@ export function afterSummary(state: GameState): GameState {
   if (state.remaining.length === 0) {
     return { ...state, phase: 'roundEnd' }
   }
-  const turnTeam = (1 - state.turnTeam) as TeamIdx
+  // Co-op has one team: it just goes again with the next clue-giver.
+  const turnTeam = isCoop(state) ? 0 : ((1 - state.turnTeam) as TeamIdx)
   return toPassScreen({ ...state, turnTeam })
 }
 
@@ -175,7 +201,7 @@ export function nextRound(state: GameState): GameState {
     return { ...state, phase: 'gameEnd' }
   }
   // The team that didn't take the last turn leads the new round.
-  const turnTeam = (1 - state.turnTeam) as TeamIdx
+  const turnTeam = isCoop(state) ? 0 : ((1 - state.turnTeam) as TeamIdx)
   return {
     ...state,
     round: state.round + 1,

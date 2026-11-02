@@ -11,6 +11,8 @@ the same deck all the way through.
 **Play it:** https://calesi19.github.io/Monikers/
 
 - 181 built-in name cards with a short blurb each
+- Versus (Blue vs Gold, most cards wins) or co-op (one team, fewest turns to
+  clear all three rounds wins; the phone remembers your best)
 - 30/40/50-card decks, 45/60/90-second turns
 - The game saves itself after every move — refresh, lock the phone, come
   back later and resume

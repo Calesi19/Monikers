@@ -57,10 +57,16 @@ Self-hosted via @fontsource (same Google Fonts files) so the offline PWA keeps i
 
 ## Screens
 - Home: ransom-note title, tape strip, three mini flyers previewing the three pressings.
-- Setup: two VIP gig tickets (teams), two rows of newspaper clippings (deck size, turn length) with a slammed rubber stamp on the chosen one.
+- Setup: two gig tickets pick the mode (versus / co-op), two rows of newspaper clippings (deck size, turn length) with a slammed rubber stamp on the chosen one.
   (There is no card-drafting phase in the game; the stamp lives on the setup choices instead, so mechanics stay unchanged.)
 - Round intro: pressing poster + per-round rule banner (tape / stencil / neon).
 - Pass: full-bleed team poster, huge "START 60s TURN" sticker. No card on screen.
 - Turn: 100dvh grid. Timer box + hazard bar, taped card on a pile, PASS / GOT IT thumb buttons.
 - Summary: guessed names as clipped words.
 - Round end / final: gig setlist with dotted leaders and per-round badges.
+
+## Co-op mode
+- Engine: `GameState.mode` ('versus' | 'coop', missing = versus) and `turns[round]`, counted in `startTurn`.
+  Co-op keeps `turnTeam` at 0; points are still counted but the score is total turns (fewer is better).
+- Colour: co-op uses the "got it" ink (`--coop` = lime, soy in round 2).
+- Best score: localStorage `monikers-pocket-coop-best-v1`, keyed by deck size x turn seconds.

@@ -4,6 +4,8 @@ import {
   afterSummary,
   currentCard,
   endTurn,
+  isCoop,
+  turnsUsed,
   gotIt,
   nextRound,
   passCard,
@@ -23,6 +25,7 @@ import {
   Setlist,
   TEAM_META,
   TeamChip,
+  TurnBug,
   cn,
   pad2,
 } from '../ui'
@@ -38,7 +41,7 @@ function Header({ state }: { state: GameState }) {
         </span>
         <span className="meta muted">{state.remaining.length} cards in the pile</span>
       </div>
-      <ScoreBug totals={totalScores(state)} />
+      {isCoop(state) ? <TurnBug state={state} /> : <ScoreBug totals={totalScores(state)} />}
     </div>
   )
 }
@@ -88,9 +91,28 @@ export function RoundIntro({ state, act }: { state: GameState; act: Act }) {
 
 export function PassScreen({ state, act }: { state: GameState; act: Act }) {
   const team = state.turnTeam
+  const coop = isCoop(state)
+  const nextTurn = turnsUsed(state)[state.round] + 1
   return (
     <div className="screen">
       <Header state={state} />
+      {coop ? (
+        <article className="poster poster--team team-coop">
+          <span className="poster__dots" aria-hidden="true" />
+          <p className="poster__kicker">
+            Next clue-giver · R{pad2(state.round + 1)} {ROUND_RULES[state.round].title}
+          </p>
+          <h1 className="poster__title" style={fitW('Turn 00')}>
+            Turn
+            <br />
+            {pad2(nextTurn)}
+          </h1>
+          <p className="poster__body">
+            Pass the phone to the next person in the circle. They give the
+            clues, everyone else guesses. Fewer turns per round is the score.
+          </p>
+        </article>
+      ) : (
       <article className={cn('poster poster--team', team === 0 ? 'team-a' : 'team-b')}>
         <span className="poster__dots" aria-hidden="true" />
         <p className="poster__kicker">
@@ -107,6 +129,7 @@ export function PassScreen({ state, act }: { state: GameState; act: Act }) {
           eyes off the screen.
         </p>
       </article>
+      )}
       <RuleBanner round={state.round} />
       <Btn
         variant="start"
@@ -260,9 +283,11 @@ export function TurnScreen({ state, act }: { state: GameState; act: Act }) {
     <div className="turn">
       <div className="turn__team">
         <h1 className="sr-only">
-          {TEAM_META[team].label} team turn, round {state.round + 1}
+          {isCoop(state)
+            ? `Co-op turn ${turnsUsed(state)[state.round]}, round ${state.round + 1}`
+            : `${TEAM_META[team].label} team turn, round ${state.round + 1}`}
         </h1>
-        <TeamChip team={team} />
+        <TeamChip team={team} coop={isCoop(state)} />
         <span className="turn__rule">
           R{pad2(state.round + 1)} // {ROUND_RULES[state.round].title}
         </span>
@@ -351,14 +376,15 @@ export function TurnSummary({ state, act }: { state: GameState; act: Act }) {
   const team = state.turnTeam
   const nextTeam = team === 0 ? 1 : 0
   const n = state.turnGuessed.length
+  const coop = isCoop(state)
   return (
     <div className="screen">
       <Header state={state} />
-      <article className={cn('poster', team === 0 ? 'team-a' : 'team-b')} style={{ ['--p-bg' as string]: 'var(--t-bg)', ['--p-fg' as string]: 'var(--t-fg)' }}>
+      <article className={cn('poster', coop ? 'team-coop' : team === 0 ? 'team-a' : 'team-b')} style={{ ['--p-bg' as string]: 'var(--t-bg)', ['--p-fg' as string]: 'var(--t-fg)' }}>
         <span className="poster__dots" aria-hidden="true" />
         <p className="poster__kicker">
           {state.deckCleared ? 'Pile empty · round over' : "Time's up"} ·{' '}
-          {TEAM_META[team].label} team
+          {coop ? `Turn ${pad2(turnsUsed(state)[state.round])}` : `${TEAM_META[team].label} team`}
         </p>
         <h1 className="big-score" style={{ marginTop: '0.5rem', ...fitW(`+${n}`) }}>
           +{n}
@@ -367,7 +393,9 @@ export function TurnSummary({ state, act }: { state: GameState; act: Act }) {
         <p className="poster__body">
           {state.deckCleared
             ? 'That was the last card in the pile. The round is done.'
-            : 'The card in hand goes back into the pile for the next team.'}
+            : coop
+              ? 'The card in hand goes back into the pile for the next clue-giver.'
+              : 'The card in hand goes back into the pile for the next team.'}
         </p>
       </article>
 
@@ -387,14 +415,18 @@ export function TurnSummary({ state, act }: { state: GameState; act: Act }) {
         </ul>
       ) : (
         <p className="lede muted" style={{ alignSelf: 'center', textAlign: 'center' }}>
-          Nothing that turn. The other team sends its thanks.
+          {coop
+            ? 'Nothing that turn. Shake it off and pass the phone.'
+            : 'Nothing that turn. The other team sends its thanks.'}
         </p>
       )}
 
-      <Btn variant={state.remaining.length === 0 ? 'primary' : nextTeam === 0 ? 'teama' : 'teamb'} onClick={() => act(afterSummary)}>
+      <Btn variant={state.remaining.length === 0 || coop ? 'primary' : nextTeam === 0 ? 'teama' : 'teamb'} onClick={() => act(afterSummary)}>
         {state.remaining.length === 0
           ? 'See round results'
-          : `Pass to the ${TEAM_META[nextTeam].label} team`}
+          : coop
+            ? 'Next player'
+            : `Pass to the ${TEAM_META[nextTeam].label} team`}
       </Btn>
     </div>
   )
@@ -415,7 +447,9 @@ export function RoundEnd({ state, act }: { state: GameState; act: Act }) {
           Round {state.round + 1} done
         </h1>
         <p className="lede" style={{ marginTop: '0.75rem' }}>
-          Blue took {r[0]}, Gold took {r[1]} this round.
+          {isCoop(state)
+            ? `Cleared in ${turnsUsed(state)[state.round]} ${turnsUsed(state)[state.round] === 1 ? 'turn' : 'turns'}.`
+            : `Blue took ${r[0]}, Gold took ${r[1]} this round.`}
           {state.round < 2 &&
             ` Next pressing: ${PRESSINGS[state.round + 1].name}, ${ROUND_RULES[state.round + 1].title.toLowerCase()}.`}
         </p>

@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   endTurn,
+  isCoop,
   newGame,
+  totalTurns,
   totalScores,
   type GameConfig,
   type GameState,
@@ -75,6 +77,7 @@ export default function App() {
     startGame({
       turnSeconds: game.turnSeconds,
       deckSize: game.deck.length + game.removed.length,
+      mode: game.mode ?? 'versus',
     })
   }
 
@@ -177,8 +180,10 @@ export default function App() {
                   <Btn variant="teama" onClick={() => setScreen('game')}>
                     Resume
                     <span className="btn__tag">
-                      R{String(game.round + 1).padStart(2, '0')} · {totalScores(game)[0]}:
-                      {totalScores(game)[1]}
+                      R{String(game.round + 1).padStart(2, '0')} ·{' '}
+                      {isCoop(game)
+                        ? `co-op, ${totalTurns(game)} turns`
+                        : `${totalScores(game)[0]}:${totalScores(game)[1]}`}
                     </span>
                   </Btn>
                 )}

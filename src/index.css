@@ -1851,3 +1851,126 @@ html[data-round='2'] .btn--got {
     padding-bottom: 0.75rem;
   }
 }
+
+/* ---------- Co-op ---------- */
+:root {
+  --coop: var(--got);
+  --coop-fg: var(--got-fg);
+}
+.team-coop {
+  --t-bg: var(--coop);
+  --t-fg: var(--coop-fg);
+}
+.chip--coop {
+  background: var(--coop);
+  color: var(--coop-fg);
+}
+
+/* mode tickets on setup */
+.ticket--pick {
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  padding: 0;
+  overflow: hidden;
+  background: var(--pulp);
+  color: var(--soy);
+  transition:
+    translate 140ms var(--spring),
+    box-shadow 140ms var(--spring);
+}
+@media (hover: hover) {
+  .ticket--pick:hover {
+    translate: -2px -2px;
+  }
+}
+.ticket--pick:active {
+  translate: 3px 3px;
+}
+.ticket--versus[aria-pressed='true'] {
+  background: linear-gradient(100deg, var(--team-a) 0 50%, var(--team-b) 50% 100%);
+  color: var(--soy);
+}
+html[data-round='2'] .ticket--versus[aria-pressed='true'] {
+  color: var(--newsprint);
+}
+.ticket--coop[aria-pressed='true'] {
+  background: var(--coop);
+  color: var(--coop-fg);
+}
+.ticket__stamp {
+  left: auto;
+  right: 0.375rem;
+  top: 0.375rem;
+  bottom: auto;
+  translate: none;
+  rotate: 6deg;
+}
+.ticket--pick .ticket__name {
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+}
+.ticket__big {
+  font-size: clamp(2.5rem, 12vw, 3.25rem);
+  line-height: 0.85;
+}
+.ticket__unit {
+  font: 700 0.875rem/1 var(--mono);
+  letter-spacing: 0.04em;
+}
+.ticket--pick .ticket__stub::before,
+.ticket--pick .ticket__stub::after {
+  display: none;
+}
+
+/* co-op scorebug: turns total + per-round tallies */
+.scorebug--coop {
+  grid-template-columns: auto 1fr 1fr 1fr;
+}
+.scorebug__team--coop {
+  gap: 0.75rem;
+  background: var(--coop);
+  color: var(--coop-fg);
+  border-right: 3px solid var(--line);
+}
+.scorebug__round {
+  display: grid;
+  place-items: center;
+  font: 700 0.75rem/1 var(--mono);
+  text-transform: uppercase;
+  background: var(--newsprint);
+  color: #4d4a44;
+  border-left: 1px dashed var(--soy);
+}
+.scorebug__round.is-now {
+  color: var(--soy);
+  background: var(--pulp);
+}
+
+/* co-op setlist rows: no badge line */
+.setlist__row--coop {
+  grid-template-columns: 2.25rem auto 1fr auto !important;
+}
+.setlist__team--sm {
+  font: 700 0.875rem/1.2 var(--mono);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+.setlist__unit {
+  margin-left: 0.35rem;
+  font: 700 0.75rem/1 var(--mono);
+  text-transform: uppercase;
+}
+.setlist__row--total {
+  border-bottom: 0 !important;
+  border-top: 3px solid var(--soy);
+}
+
+.big-score__unit {
+  margin-left: 0.15em;
+  font: 700 0.22em/1 var(--mono);
+  letter-spacing: 0;
+  text-transform: uppercase;
+  vertical-align: 0.15em;
+}

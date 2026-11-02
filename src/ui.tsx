@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { ROUND_RULES, type GameState, type TeamIdx } from './game/engine'
+import {
+  ROUND_RULES,
+  isCoop,
+  turnsUsed,
+  type GameState,
+  type TeamIdx,
+} from './game/engine'
 
 export function cn(...parts: (string | false | null | undefined)[]): string {
   return parts.filter(Boolean).join(' ')
@@ -48,11 +54,30 @@ export function Btn({
 /** The two teams are fixed colors — no names, no sign-ups. */
 export const TEAM_META: { label: string }[] = [{ label: 'Blue' }, { label: 'Gold' }]
 
-export function TeamChip({ team }: { team: TeamIdx }) {
+export function TeamChip({ team, coop = false }: { team: TeamIdx; coop?: boolean }) {
+  if (coop) return <span className="chip chip--coop">Co-op · one team</span>
   return (
     <span className={cn('chip', team === 0 ? 'chip--a' : 'chip--b')}>
       {TEAM_META[team].label} team
     </span>
+  )
+}
+
+/** Co-op scoreboard: turns used each round, fewer is better. */
+export function TurnBug({ state }: { state: GameState }) {
+  const t = turnsUsed(state)
+  const total = t.reduce((a, b) => a + b, 0)
+  return (
+    <div className="scorebug scorebug--coop" role="group" aria-label={`${total} turns used so far`}>
+      <span className="scorebug__team scorebug__team--coop">
+        Turns <b>{total}</b>
+      </span>
+      {t.map((n, i) => (
+        <span key={i} className={cn('scorebug__round', i === state.round && 'is-now')}>
+          R{pad2(i + 1)} {i <= state.round ? n : '--'}
+        </span>
+      ))}
+    </div>
   )
 }
 
@@ -112,6 +137,7 @@ export function Setlist({
   roundsShown: number
   note?: ReactNode
 }) {
+  if (isCoop(state)) return <CoopSetlist state={state} title={title} roundsShown={roundsShown} note={note} />
   const rounds = state.scores.slice(0, roundsShown)
   const totals: [number, number] = [
     rounds.reduce((s, r) => s + r[0], 0),
@@ -155,6 +181,59 @@ export function Setlist({
             </span>
           </li>
         ))}
+      </ol>
+      {note && <p className="setlist__note">{note}</p>}
+    </section>
+  )
+}
+
+/** Co-op setlist: one row per round, dotted leader to the turns it took. */
+function CoopSetlist({
+  state,
+  title,
+  roundsShown,
+  note,
+}: {
+  state: GameState
+  title: string
+  roundsShown: number
+  note?: ReactNode
+}) {
+  const t = turnsUsed(state)
+  const total = t.slice(0, roundsShown).reduce((a, b) => a + b, 0)
+  return (
+    <section className="paper setlist" aria-label={title}>
+      <div className="setlist__title">
+        <h2>{title}</h2>
+        <span className="meta">{pad2(roundsShown)}/03 rounds</span>
+      </div>
+      <ol>
+        {ROUND_RULES.map((r, i) => (
+          <li key={r.title} className="setlist__row--coop">
+            <span className="setlist__n">{pad2(i + 1)}.</span>
+            <span className="setlist__team setlist__team--sm">{r.title}</span>
+            <span className="setlist__dots" aria-hidden="true" />
+            <span className="setlist__pts">
+              {i < roundsShown ? (
+                <>
+                  {t[i]}
+                  <span className="setlist__unit">{t[i] === 1 ? 'turn' : 'turns'}</span>
+                </>
+              ) : (
+                '--'
+              )}
+            </span>
+          </li>
+        ))}
+        <li className="setlist__row--coop setlist__row--total">
+          <span className="setlist__n">=</span>
+          <span className="setlist__team setlist__team--sm">Total</span>
+          <span className="setlist__dots" aria-hidden="true" />
+          <span className="setlist__pts">
+            {total}
+            <span className="setlist__unit">{total === 1 ? 'turn' : 'turns'}</span>
+          </span>
+        </li>
       </ol>
       {note && <p className="setlist__note">{note}</p>}
     </section>
@@ -219,6 +298,12 @@ export function HowToPlay({ label = 'How to play' }: { label?: string }) {
                 </li>
               ))}
             </ol>
+            <p>
+              <b>Co-op</b> puts everyone on one team. Take turns giving clues
+              while everyone else guesses. Every card gets guessed in the end,
+              so the score is how many turns it takes to clear all three
+              rounds. Fewer is better, and the phone remembers your best.
+            </p>
             <p>
               Stuck on a name nobody at the table knows? The small <b>remove</b>{' '}
               link takes that card out of the game for good. Most points after

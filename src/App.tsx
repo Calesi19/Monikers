@@ -214,12 +214,6 @@ export default function App() {
           )}
         </main>
 
-        {phase !== 'turn' && (
-          <footer className="colophon">
-            <span>Monikers Pocket</span>
-            <span>Printed on one phone</span>
-          </footer>
-        )}
       </div>
     </>
   )

@@ -73,10 +73,13 @@ export function Setup({
   return (
     <div className="screen">
       <div>
-        <p className="meta muted">Issue setup · two teams, one phone</p>
-        <h1 className="display misreg" style={{ fontSize: 'clamp(2.75rem, 13vw, 4rem)', marginTop: '0.375rem' }}>
-          New game
-        </h1>
+        <div className="topbar" style={{ marginBottom: 0 }}>
+          <p className="meta muted">Issue setup · two teams, one phone</p>
+          <button type="button" className="linkish" onClick={onBack}>
+            Back
+          </button>
+        </div>
+        <h1 className="display misreg page-title">New game</h1>
       </div>
 
       <div className="tickets">
@@ -93,7 +96,7 @@ export function Setup({
           </div>
         ))}
       </div>
-      <p className="lede muted">
+      <p className="lede muted setup-lede">
         Split the room into two teams. That is all the setup there is: the
         phone keeps the cards, the clock and the score.
       </p>
@@ -120,12 +123,9 @@ export function Setup({
         />
       </section>
 
-      <div className="btn-row" style={{ marginTop: '0.5rem' }}>
+      <div className="btn-row" style={{ marginTop: 'auto' }}>
         <Btn variant="primary" onClick={() => onStart({ deckSize, turnSeconds })}>
           Print the deck <span className="btn__tag">{deckSize} cards</span>
-        </Btn>
-        <Btn variant="paper" onClick={onBack}>
-          Back
         </Btn>
       </div>
     </div>
